@@ -1,0 +1,23 @@
+name: Deploy to Production
+
+on:
+    pull_request:
+      types: [labeled]
+
+jobs:
+  prod_deploy:
+    if: contains(github.event.pull_request.labels.*.name, 'prod')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 'Login via Azure CLI'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Azure CLI script
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.9.1
+          inlineScript: |
+            az webapp deployment slot swap  -g uni-rg -n tiberna-actions --slot staging --target-slot production
